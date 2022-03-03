@@ -16,6 +16,9 @@ public class GA {
   static int numTrainingWords = 5;
   static int population = 5;
   static Chromo[] chromos;
+  private static double crossoverRate = .5;
+  private static double mutationRate = .5;
+  static int generations = 5;
 	
 	public GA() throws FileNotFoundException {
 		//System.out.println("happening");
@@ -73,7 +76,7 @@ public class GA {
 	  }
   }
   
-  public static void runGame() {
+  public void runGame() {
 	  for (int i=0; i<population; i++) {
 		  for (int j=0; j<numTrainingWords; j++) {
 			  //System.out.println(trainingWords[j]);
@@ -85,6 +88,85 @@ public class GA {
 	  }
   }
   
+  public Chromo selectParent() {
+		
+		//---------------- RANK PROPORTIONAL SELECTION --------------------
+		//since chromos in current generation have been sorted, their spot is their rank
+		for (int i = 0; i < this.population; i++) {
+			//System.out.print(this.population[i]);
+		}
+		//System.out.print("\n");
+		Random rand = new Random();
+		
+		double sumRank = 0;
+		double overallSumRanks = (this.population+1)*this.population/2.0;
+		
+		double probability = rand.nextDouble();
+		//System.out.println("selection probability: "+probability);
+		for (int c=0; c<this.population; c++) {
+			sumRank += (c+1);
+			//System.out.println("running fitness: "+runningFitness + "/total = "+runningFitness/totalFitness);
+			if (probability < sumRank/overallSumRanks)
+				return this.chromos[c];			
+		}
+		//dummy return; let's pick a parent at random
+		return this.chromos[rand.nextInt(this.population)];
+		
+		
+		/*
+		int parentIndex = rand.nextInt(populationSize);
+      for (int t=1; t<3; t++) {
+          int newIndex = rand.nextInt(populationSize);
+          if (this.population[newIndex].fitness>this.population[parentIndex].fitness)//since they are sorted, selecting lowest index is enough
+              parentIndex=newIndex;
+      }
+      return this.population[parentIndex];
+      */
+	}
+ 
+	public void crossover() {
+		
+		Chromo[] tng = new Chromo[this.population];
+		int tngSize = 0;
+		Random rand = new Random();
+		//------------ CROSSOVER
+		
+		while (tngSize < this.population-2) {
+		
+			Chromo parent1 = selectParent();
+			Chromo parent2 = selectParent();
+			while (parent1 == parent2)
+				parent2 = selectParent();
+			
+			//System.out.println(Arrays.deepToString(parent1.getPolicy()));
+			Chromo child1 = new Chromo (parent1.getStrat());
+			Chromo child2 = new Chromo (parent2.getStrat());
+			
+			if (rand.nextDouble()<crossoverRate)
+				//Chromo.uniform_crossover(child1,child2);
+				//Chromo.singlepoint_crossover(child1,child2);
+				Chromo.crossover(child1,child2);
+			if (rand.nextDouble()<mutationRate)
+				child1.mutate();
+			if (rand.nextDouble()<mutationRate)
+				child2.mutate();
+			
+			
+			tng[tngSize] = child1;
+			tngSize++;
+			tng[tngSize] = child2;
+			tngSize++;
+		}
+		// -------------------ELITISM----------------------------
+		
+		tng[tngSize] = this.chromos[this.population-1];
+		tngSize++;
+		//tng[tngSize] = this.chromos[this.population-2];
+		//tngSize++;
+		
+		
+		this.chromos = tng;
+	}
   
   public static void main(String[] args) throws FileNotFoundException {
       GA wordle = new GA();
@@ -93,7 +175,12 @@ public class GA {
       wordle.createPop();
       
       //System.out.println(Arrays.toString(words));
-      runGame();
+      for (int i=0; i<generations; i++) {
+    	  System.out.println("\n \n next gen ");
+    	  wordle.runGame();
+    	  wordle.crossover();
+      }
+      
       //have a method that chooses random __ words to run a game on and have the population do that.
       //run that inside as many training rounds as we want.
     }
