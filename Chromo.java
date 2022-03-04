@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class Chromo  implements Comparable<Chromo>{
 	public int chromoID;
-	public static double fitness;
+	public double fitness;
 
 	public String word;
 	private List<String> remain;
@@ -62,6 +62,7 @@ public class Chromo  implements Comparable<Chromo>{
 	}
 
 	public Chromo (TreeMap<Integer,Integer> strat) {
+		this.fitness = 0;
 		Random rand = new Random();
 		//this.strat = strat.clone();
 		if (this.strat==null)
@@ -72,7 +73,7 @@ public class Chromo  implements Comparable<Chromo>{
 			this.strat.put(entry.getKey(),entry.getValue());
 		}
 		//System.out.println(Arrays.toString(this.policy));
-		this.fitness=-1;
+		//this.fitness=-1;
 		this.chromoID = Chromo.totalChromos;
 		Chromo.totalChromos++;
 	}
@@ -109,6 +110,14 @@ public class Chromo  implements Comparable<Chromo>{
 	
 	public TreeMap<Integer,Integer> getStrat() {
 		return this.strat;
+	}
+	
+	public double getFitness() {
+		return this.fitness;
+	}
+	
+	public void setFitness(double newFit) {
+		this.fitness = newFit;
 	}
 
 	@Override
