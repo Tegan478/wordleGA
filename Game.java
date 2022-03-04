@@ -2,7 +2,7 @@ import java.util.Map;
 import java.util.Random;
 
 public class Game{
-	public int maxGuesses = 5;
+	public int maxGuesses = 20;
 	public static String answer; 
 	public Chromo chrom;
 
@@ -29,7 +29,8 @@ public class Game{
 			choice = randSelect(guess);
 			tries++;
 		}
-		chrom.fitness += tries;
+		//System.out.println(tries);
+		chrom.setFitness(chrom.getFitness() + tries);
 		/*
 		if (guess.correct) {
 			System.out.println(this.answer + " " +tries);
