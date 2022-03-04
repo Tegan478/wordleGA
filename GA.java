@@ -18,7 +18,7 @@ public class GA {
   static Chromo[] chromos;
   private static double crossoverRate = .5;
   private static double mutationRate = .5;
-  static int generations = 5;
+  static int generations = 10;
 	
 	public GA() throws FileNotFoundException {
 		//System.out.println("happening");
@@ -78,13 +78,16 @@ public class GA {
   
   public void runGame() {
 	  for (int i=0; i<population; i++) {
+		  //System.out.println("before " + chromos[i].getFitness());
+		  chromos[i].setFitness(0.0); //i know this is bad practice but... before it was using the previous fitness somehow...
 		  for (int j=0; j<numTrainingWords; j++) {
 			  //System.out.println(trainingWords[j]);
 			  Game game = new Game(words[trainingWords[j]], chromos[i]);
 			  game.testFitness();
 		  }
-		  chromos[i].fitness = chromos[i].fitness / numTrainingWords; 
-		  System.out.println("chromo: " + chromos[i].chromoID + " with fitness "+ chromos[i].fitness);
+		  //System.out.println(chromos[i].getFitness() + " / " + numTrainingWords);
+		  chromos[i].setFitness(chromos[i].getFitness() / numTrainingWords); 
+		  System.out.println("chromo: " + chromos[i].chromoID + " with fitness "+ chromos[i].getFitness());
 	  }
   }
   
@@ -176,8 +179,9 @@ public class GA {
       
       //System.out.println(Arrays.toString(words));
       for (int i=0; i<generations; i++) {
-    	  System.out.println("\n \n next gen ");
+    	  System.out.println("\n\nnext gen ");
     	  wordle.runGame();
+    	  Arrays.sort(wordle.chromos);
     	  wordle.crossover();
       }
       
