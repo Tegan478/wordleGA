@@ -12,19 +12,22 @@ public class GA {
   public static String[] guesses; //fill with possible guesses
   int wordsLen;
   static int guessesLen;
+  static int elites = 2;
   static int[] trainingWords;
-  static int numTrainingWords = 5;
-  static int population = 5;
+  static int numTrainingWords = 100;
+  static int population = 20;
   static Chromo[] chromos;
   private static double crossoverRate = .5;
   private static double mutationRate = .5;
-  static int generations = 10;
+  private static double mutationRateE = .7;
+  static int generations = 300;
 	
 	public GA() throws FileNotFoundException {
 		//System.out.println("happening");
 		trainingWords = new int[numTrainingWords];
 		
 		File file = new File("./src/words.txt");
+		//File file = new File("./src/tester.txt");
 		wordsLen = 0;
 	    guessesLen = 0;
 	    Scanner sc = new Scanner(file);
@@ -34,6 +37,7 @@ public class GA {
 	    }
 	    sc.close();
 	    File file1 = new File("./src/guesses.txt");
+	    //File file1 = new File("./src/tester.txt");
 	    Scanner scc = new Scanner(file1);
 	    while(scc.hasNext()){
 	      String line = scc.nextLine();       
@@ -48,6 +52,7 @@ public class GA {
 
   public void fillArrays() throws FileNotFoundException {
 	File file = new File("./src/words.txt");
+	//File file = new File("./src/tester.txt");
     Scanner sc1 = new Scanner(file);
     for (int i=0; i<wordsLen; i++) {
       String line = sc1.nextLine();  
@@ -55,6 +60,7 @@ public class GA {
     }
     sc1.close();
     File file1 = new File("./src/guesses.txt");
+    //File file1 = new File("./src/tester.txt");
     Scanner sc2 = new Scanner(file1);
     for (int i=0; i<guessesLen; i++) {
       String line = sc2.nextLine();  
@@ -80,14 +86,19 @@ public class GA {
 	  for (int i=0; i<population; i++) {
 		  //System.out.println("before " + chromos[i].getFitness());
 		  chromos[i].setFitness(0.0); //i know this is bad practice but... before it was using the previous fitness somehow...
+		  int maxCount = 0;
 		  for (int j=0; j<numTrainingWords; j++) {
 			  //System.out.println(trainingWords[j]);
 			  Game game = new Game(words[trainingWords[j]], chromos[i]);
-			  game.testFitness();
+			  if(!game.testFitness()) maxCount++;
+			  if (maxCount > 1) {
+				  chromos[i].setFitness(numTrainingWords * 10);
+				  break;
+			  }
 		  }
 		  //System.out.println(chromos[i].getFitness() + " / " + numTrainingWords);
 		  chromos[i].setFitness(chromos[i].getFitness() / numTrainingWords); 
-		  System.out.println("chromo: " + chromos[i].chromoID + " with fitness "+ chromos[i].getFitness());
+		  //System.out.println("chromo: " + chromos[i].chromoID + " with fitness "+ chromos[i].getFitness() + " " + chromos[i].word);
 	  }
   }
   
@@ -95,9 +106,7 @@ public class GA {
 		
 		//---------------- RANK PROPORTIONAL SELECTION --------------------
 		//since chromos in current generation have been sorted, their spot is their rank
-		for (int i = 0; i < this.population; i++) {
-			//System.out.print(this.population[i]);
-		}
+
 		//System.out.print("\n");
 		Random rand = new Random();
 		
@@ -134,7 +143,7 @@ public class GA {
 		Random rand = new Random();
 		//------------ CROSSOVER
 		
-		while (tngSize < this.population-2) {
+		while (tngSize < this.population-elites) {
 		
 			Chromo parent1 = selectParent();
 			Chromo parent2 = selectParent();
@@ -161,11 +170,17 @@ public class GA {
 			tngSize++;
 		}
 		// -------------------ELITISM----------------------------
+		//have a seperate mutation on the elites that just messes with ss values
+		if (rand.nextDouble() < mutationRateE) {
+			this.chromos[0].mutateE();
+			this.chromos[1].mutateE();
+		}
 		
-		tng[tngSize] = this.chromos[this.population-1];
+		tng[tngSize] = this.chromos[0];
 		tngSize++;
-		//tng[tngSize] = this.chromos[this.population-2];
-		//tngSize++;
+		
+		tng[tngSize] = this.chromos[1];
+		tngSize++;
 		
 		
 		this.chromos = tng;
@@ -179,9 +194,10 @@ public class GA {
       
       //System.out.println(Arrays.toString(words));
       for (int i=0; i<generations; i++) {
-    	  System.out.println("\n\nnext gen ");
+    	  System.out.println("\n\nnext gen " + i);
     	  wordle.runGame();
     	  Arrays.sort(wordle.chromos);
+    	  System.out.println("best? " + wordle.chromos[0].getFitness() + " " + wordle.chromos[0].word + " strat: " + wordle.chromos[0].strat.toString());
     	  wordle.crossover();
       }
       
