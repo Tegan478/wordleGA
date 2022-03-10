@@ -1,3 +1,4 @@
+  
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -6,8 +7,6 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 /*
-
-
 TODO:
 make a guess class that holds the words so far
 an array of greens, a 2d array of yellows, and a list of grays
